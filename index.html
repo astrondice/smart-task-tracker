@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart To-Do List with Progress Tracker</title>
+    <style>
+        /* CSS Variables for Light/Dark Mode Colors */
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #888888;
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --success-color: #2ecc71;
+            --border-color: #e0e0e0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Dark Mode Overrides */
+        [data-theme="dark"] {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #2a2a4a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Basic Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* Centered Card Layout */
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        /* Progress Tracker Styles */
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--border-color);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--success-color);
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        /* Input Area Styles */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .task-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .add-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .add-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Task List Styles */
+        .task-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Custom Scrollbar */
+        .task-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .task-list::-webkit-scrollbar-track {
+            background: var(--bg-color);
+            border-radius: 10px;
+        }
+        .task-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: var(--transition);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* Custom Checkbox */
+        .checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .checkbox:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .task-text {
+            font-size: 16px;
+            transition: var(--transition);
+            word-break: break-word;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>My Tasks</h1>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+        </div>
+
+        <!-- Progress Bar Section -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <span>Daily Progress</span>
+                <span id="progressText">0/0 Completed</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-group">
+            <input type="text" class="task-input" id="taskInput" placeholder="What needs to be done?">
+            <button class="add-btn" id="addBtn">Add</button>
+        </div>
+
+        <!-- Task List Section -->
+        <ul class="task-list" id="taskList">
+            <!-- Tasks are dynamically injected here via JS -->
+        </ul>
+    </div>
+
+    <script>
+        // DOM Element Selection
+        const taskInput = document.getElementById('taskInput');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Application State
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+
+        // Apply theme on initial load
+        if (isDarkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Save state to local storage and update UI
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateProgress();
+        }
+
+        // Calculate and update progress bar
+        function updateProgress() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const progressPercentage = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+            
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.textContent = `${completedTasks}/${totalTasks} Completed`;
+        }
+
+        // Render the task list to the DOM
+        function renderTasks() {
+            taskList.innerHTML = ''; // Clear current list
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<div class="empty-state">No tasks yet. Add one above! ✨</div>';
+                updateProgress();
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                
+                // Construct inner HTML securely
+                li.innerHTML = `
+                    <div class="task-content" onclick="toggleTask(${index})">
+                        <input type="checkbox" class="checkbox" ${task.completed ? 'checked' : ''} onclick="event.stopPropagation(); toggleTask(${index})">
+                        <span class="task-text">${escapeHTML(task.text)}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTask(${index})" title="Delete Task">🗑️</button>
+                `;
+                
+                taskList.appendChild(li);
+            });
+            
+            updateProgress();
+        }
+
+        // Create a new task
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (text) {
+                tasks.push({ text: text, completed: false });
+                taskInput.value = '';
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        // Toggle task completion status
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+
+        // Delete a specific task
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Utility: Prevent Cross-Site Scripting (XSS)
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // --- Event Listeners ---
+        addBtn.addEventListener('click', addTask);
+        
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Initialize application UI
+        renderTasks();
+    </script>
+</body>
+</html>
