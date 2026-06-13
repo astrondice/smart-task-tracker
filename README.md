@@ -1,12 +1,19 @@
 # 🚀 Smart Task Tracker
+<div align="center">
 
-### Organize. Track. Achieve.
+# 🚀 Live Preview
 
-🌐 Live Demo:
-https://astrondice.github.io/smart-task-tracker/
+<h3>Try Smart Task Tracker Now</h3>
 
----<div align="center">
+### 🔗 https://astrondice.github.io/smart-task-tracker/
 
+<a href="https://astrondice.github.io/smart-task-tracker/">
+<img src="https://img.shields.io/badge/View_Live_Website-00C853?style=for-the-badge&logo=googlechrome&logoColor=white">
+</a>
+
+⭐ Experience the full application directly in your browser.
+
+</div>
 # 🚀 Smart To-Do List
 
 ### Organize. Track. Achieve.
